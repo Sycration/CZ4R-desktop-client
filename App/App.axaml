@@ -1,0 +1,24 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="App.App"
+             xmlns:local="using:App"
+             xmlns:conv="using:App.Converters"
+             RequestedThemeVariant="Default">
+
+    <Application.Resources>
+        <conv:StripeConverter x:Key="StripeConverter" />
+        <conv:HighlightConverter x:Key="HighlightConverter" />
+        <conv:UnassignedConverter x:Key="UnassignedConverter" />
+        <conv:StatusColorConverter x:Key="StatusColorConverter" />
+        <conv:StatusEmojiConverter x:Key="StatusEmojiConverter" />
+        <conv:IncompleteColorConverter x:Key="IncompleteColorConverter" />
+    </Application.Resources>
+
+    <Application.DataTemplates>
+        <local:ViewLocator/>
+    </Application.DataTemplates>
+  
+    <Application.Styles>
+        <FluentTheme />
+    </Application.Styles>
+</Application>

@@ -1,0 +1,224 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:App.ViewModels"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="960" d:DesignHeight="700"
+             x:Class="App.Views.AdminView"
+             x:DataType="vm:AdminViewModel">
+
+    <Design.DataContext>
+        <vm:AdminViewModel/>
+    </Design.DataContext>
+
+    <StackPanel Spacing="10" Margin="10">
+
+            <!-- ══ Workers ═══════════════════════════════════════ -->
+            <Border BorderBrush="Gray" BorderThickness="1" CornerRadius="4" Padding="8">
+                <StackPanel Spacing="8">
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <TextBlock Text="Workers" FontSize="16" FontWeight="Bold" />
+                        <Button Command="{Binding LoadWorkersCommand}" Content="Refresh" />
+                        <TextBlock Text="{Binding WStatus}" VerticalAlignment="Center" Foreground="Gray" />
+                    </StackPanel>
+
+                    <!-- Create Worker form -->
+                    <Expander Header="Create Worker" IsExpanded="False" HorizontalAlignment="Stretch"
+                                  HorizontalContentAlignment="Stretch">
+                        <Grid ColumnDefinitions="Auto,* Auto,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto">
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Name:" VerticalAlignment="Center" />
+                            <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding CwName}" />
+                            <TextBlock Grid.Row="0" Grid.Column="2" Text="Address:" VerticalAlignment="Center" Margin="8,0,4,0" />
+                            <TextBox Grid.Row="0" Grid.Column="3" Text="{Binding CwAddress}" />
+
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Phone:" VerticalAlignment="Center" />
+                            <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding CwPhone}" />
+                            <TextBlock Grid.Row="1" Grid.Column="2" Text="Email:" VerticalAlignment="Center" Margin="8,0,4,0" />
+                            <TextBox Grid.Row="1" Grid.Column="3" Text="{Binding CwEmail}" />
+
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Hourly ($):" VerticalAlignment="Center" />
+                            <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding CwHourly}" />
+                            <TextBlock Grid.Row="2" Grid.Column="2" Text="Mileage ($):" VerticalAlignment="Center" Margin="8,0,4,0" />
+                            <TextBox Grid.Row="2" Grid.Column="3" Text="{Binding CwMileage}" />
+
+                            <TextBlock Grid.Row="3" Grid.Column="0" Text="Drivetime ($):" VerticalAlignment="Center" />
+                            <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding CwDrivetime}" />
+                            <TextBlock Grid.Row="3" Grid.Column="2" Text="Flat rate ($):" VerticalAlignment="Center" Margin="8,0,4,0" />
+                            <TextBox Grid.Row="3" Grid.Column="3" Text="{Binding CwFlatrate}" />
+
+                            <StackPanel Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="4" Orientation="Horizontal" Spacing="10" Margin="0,4,0,0">
+                                <CheckBox Content="Admin" IsChecked="{Binding CwAdmin}" />
+                                <Button Command="{Binding CreateWorkerCommand}" Content="Create" />
+                                <TextBlock Text="{Binding CwStatus}" VerticalAlignment="Center" Foreground="Gray" />
+                            </StackPanel>
+                        </Grid>
+                    </Expander>
+
+                    <!-- Worker list + edit sidebar -->
+                    <Grid ColumnDefinitions="1*,2*" MinHeight="180">
+                        <ListBox Grid.Column="0" ItemsSource="{Binding Workers}" SelectedItem="{Binding SelectedWorker}"
+                                 Margin="0,0,6,0">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Name}" FontWeight="Bold" />
+                                        <TextBlock Text="{Binding Id, StringFormat='#{0}'}" Foreground="Gray" />
+                                        <StackPanel Orientation="Horizontal" Spacing="4">
+                                            <TextBlock Text="{Binding Deactivated, StringFormat='Inactive: {0}'}"
+                                                       Foreground="Red" IsVisible="{Binding Deactivated}" />
+                                            <TextBlock Text="{Binding Admin, StringFormat='Admin: {0}'}"
+                                                       Foreground="DodgerBlue" IsVisible="{Binding Admin}" />
+                                        </StackPanel>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+
+                        <Border Grid.Column="1" BorderBrush="Gray" BorderThickness="1" CornerRadius="3" Padding="8"
+                                IsVisible="{Binding HasSelectedWorker}">
+                            <StackPanel Spacing="6">
+                                <TextBlock Text="Edit Worker" FontWeight="Bold" />
+<Grid ColumnDefinitions="Auto,2*,Auto,2*" RowDefinitions="Auto,Auto,Auto,Auto,Auto">
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="ID:" VerticalAlignment="Center" />
+                                    <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding EwId}" IsReadOnly="True" />
+                                    <TextBlock Grid.Row="0" Grid.Column="2" Text="Name:" VerticalAlignment="Center" Margin="8,0,4,0" />
+                                    <TextBox Grid.Row="0" Grid.Column="3" Text="{Binding EwName}" />
+
+                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Phone:" VerticalAlignment="Center" />
+                                    <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding EwPhone}" />
+                                    <TextBlock Grid.Row="1" Grid.Column="2" Text="Email:" VerticalAlignment="Center" Margin="8,0,4,0" />
+                                    <TextBox Grid.Row="1" Grid.Column="3" Text="{Binding EwEmail}" />
+
+                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Address:" VerticalAlignment="Center" />
+                                    <TextBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3" Text="{Binding EwAddress}" />
+
+                                    <TextBlock Grid.Row="3" Grid.Column="0" Text="Hourly ($):" VerticalAlignment="Center" />
+                                    <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding EwHourly}" />
+                                    <TextBlock Grid.Row="3" Grid.Column="2" Text="Mileage ($):" VerticalAlignment="Center" Margin="8,0,4,0" />
+                                    <TextBox Grid.Row="3" Grid.Column="3" Text="{Binding EwMileage}" />
+
+                                    <TextBlock Grid.Row="4" Grid.Column="0" Text="Drivetime ($):" VerticalAlignment="Center" />
+                                    <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding EwDrivetime}" />
+                                    <TextBlock Grid.Row="4" Grid.Column="2" Text="Flat rate ($):" VerticalAlignment="Center" Margin="8,0,4,0" />
+                                    <TextBox Grid.Row="4" Grid.Column="3" Text="{Binding EwFlatrate}" />
+                                </Grid>
+                                <StackPanel Orientation="Horizontal" Spacing="4">
+                                    <CheckBox Content="Admin" IsChecked="{Binding EwAdmin}" VerticalAlignment="Center"
+                                          IsEnabled="{Binding IsNotEditingSelf}" />
+                                    <Button Command="{Binding SaveWorkerCommand}" Content="Save" />
+                                    <TextBlock Text="{Binding EwStatus}" VerticalAlignment="Center" Foreground="Gray" />
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,4,0,0">
+                                    <Button Command="{Binding DeactivateWorkerCommand}" Content="Deactivate"
+                                                IsEnabled="{Binding IsNotEditingSelf}" />
+                                    <Button Command="{Binding RestoreWorkerCommand}" Content="Restore" />
+                                    <Button Command="{Binding ResetWorkerPasswordCommand}" Content="Reset Password" />
+                                    <Button Command="{Binding ForceLogoutWorkerCommand}" Content="Force Logout" />
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- ══ Export ═══════════════════════════════════════ -->
+            <Border BorderBrush="Gray" BorderThickness="1" CornerRadius="4" Padding="8">
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                    <TextBlock Text="Export Database" FontSize="16" FontWeight="Bold" VerticalAlignment="Center" />
+                    <Button Click="ExportDatabase_Click" Content="Export SQL Dump" />
+                    <TextBlock Text="{Binding ExportStatus}" VerticalAlignment="Center" Foreground="Gray" />
+                </StackPanel>
+            </Border>
+
+            <!-- ══ Worker Data ═══════════════════════════════════════ -->
+            <Border BorderBrush="Gray" BorderThickness="1" CornerRadius="4" Padding="8">
+                <StackPanel Spacing="8">
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <TextBlock Text="Worker Data" FontSize="16" FontWeight="Bold" VerticalAlignment="Center" />
+                        <Button Command="{Binding FetchWorkerDataCommand}" Content="Fetch Data" />
+                        <TextBlock Text="{Binding WdStatus}" VerticalAlignment="Center" Foreground="Gray" />
+                    </StackPanel>
+
+                    <Grid ColumnDefinitions="Auto,*">
+                        <Calendar x:Name="WdDateRangeCalendar" Grid.Column="0"
+                                  SelectionMode="SingleRange" AllowTapRangeSelection="True"
+                                  SelectedDate="{Binding WdStartDate}"
+                                  SelectedDatesChanged="WdDateRange_SelectedDatesChanged"
+                                  Loaded="WdDateRangeCalendar_Loaded"
+                                  MinWidth="260" Margin="0,0,8,0" />
+
+                        <StackPanel Grid.Column="1" Spacing="4">
+                            <TextBlock FontWeight="Bold" Margin="4,0,0,0">
+                                <Run Text="{Binding WdFrom}" /><Run Text=" → " /><Run Text="{Binding WdTo}" />
+                            </TextBlock>
+
+                            <!-- Table header -->
+                            <Grid ColumnDefinitions="85,50,160,50,60,50,55,55,55" Margin="4,0">
+                                <TextBlock Grid.Column="0" Text="Date" FontWeight="Bold" />
+                                <TextBlock Grid.Column="1" Text="Job" FontWeight="Bold" />
+                                <TextBlock Grid.Column="2" Text="Location" FontWeight="Bold" />
+                                <TextBlock Grid.Column="3" Text="Hours" FontWeight="Bold" />
+                                <TextBlock Grid.Column="4" Text="Drv Hrs" FontWeight="Bold" />
+                                <TextBlock Grid.Column="5" Text="Miles" FontWeight="Bold" />
+                                <TextBlock Grid.Column="6" Text="Exp $" FontWeight="Bold" />
+                                <TextBlock Grid.Column="7" Text="Flat" FontWeight="Bold" />
+                                <TextBlock Grid.Column="8" Text="Done" FontWeight="Bold" />
+                            </Grid>
+
+                            <ScrollViewer MaxHeight="400">
+                                <ItemsControl ItemsSource="{Binding WdEntries}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid ColumnDefinitions="85,50,160,50,60,50,55,55,55"
+                                                  Background="{Binding Index, Converter={StaticResource StripeConverter}}">
+                                                <TextBlock Grid.Column="0" Text="{Binding Data.Date}" VerticalAlignment="Center"
+                                                           Foreground="{Binding Data.Completed, Converter={StaticResource IncompleteColorConverter}}" />
+                                                <TextBlock Grid.Column="1" Text="{Binding Data.JobId, StringFormat='#{0}'}"
+                                                           VerticalAlignment="Center"
+                                                           Foreground="{Binding Data.Completed, Converter={StaticResource IncompleteColorConverter}}" />
+                                                <TextBlock Grid.Column="2" Text="{Binding Data.Location}" VerticalAlignment="Center"
+                                                           TextTrimming="CharacterEllipsis"
+                                                           Foreground="{Binding Data.Completed, Converter={StaticResource IncompleteColorConverter}}" />
+                                                <TextBlock Grid.Column="3" Text="{Binding Data.HoursWorked}" VerticalAlignment="Center"
+                                                           Foreground="{Binding Data.Completed, Converter={StaticResource IncompleteColorConverter}}" />
+                                                <TextBlock Grid.Column="4" Text="{Binding Data.HoursDriven}" VerticalAlignment="Center"
+                                                           Foreground="{Binding Data.Completed, Converter={StaticResource IncompleteColorConverter}}" />
+                                                <TextBlock Grid.Column="5" Text="{Binding Data.MilesDriven}" VerticalAlignment="Center"
+                                                           Foreground="{Binding Data.Completed, Converter={StaticResource IncompleteColorConverter}}" />
+                                                <TextBlock Grid.Column="6" Text="{Binding Data.ExtraExpensesDollars}"
+                                                           VerticalAlignment="Center"
+                                                           Foreground="{Binding Data.Completed, Converter={StaticResource IncompleteColorConverter}}" />
+                                                <TextBlock Grid.Column="7" Text="{Binding Data.FlatRate}" VerticalAlignment="Center"
+                                                           Foreground="{Binding Data.Completed, Converter={StaticResource IncompleteColorConverter}}" />
+                                                <TextBlock Grid.Column="8" Text="{Binding Data.Completed}" VerticalAlignment="Center"
+                                                           Foreground="{Binding Data.Completed, Converter={StaticResource IncompleteColorConverter}}" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </ScrollViewer>
+
+                            <!-- Totals row -->
+                            <Grid ColumnDefinitions="85,50,160,50,60,50,55,55,55"
+                                  Margin="0,4,0,0">
+                                <TextBlock Grid.Column="0" Text="TOTALS" VerticalAlignment="Center" FontWeight="Bold"
+                                           Foreground="{Binding WdTotals.Data.Completed, Converter={StaticResource IncompleteColorConverter}}" />
+                                <TextBlock Grid.Column="3" Text="{Binding WdTotals.Data.HoursWorked}" VerticalAlignment="Center" FontWeight="Bold"
+                                           Foreground="{Binding WdTotals.Data.Completed, Converter={StaticResource IncompleteColorConverter}}" />
+                                <TextBlock Grid.Column="4" Text="{Binding WdTotals.Data.HoursDriven}" VerticalAlignment="Center" FontWeight="Bold"
+                                           Foreground="{Binding WdTotals.Data.Completed, Converter={StaticResource IncompleteColorConverter}}" />
+                                <TextBlock Grid.Column="5" Text="{Binding WdTotals.Data.MilesDriven}" VerticalAlignment="Center" FontWeight="Bold"
+                                           Foreground="{Binding WdTotals.Data.Completed, Converter={StaticResource IncompleteColorConverter}}" />
+                                <TextBlock Grid.Column="6" Text="{Binding WdTotals.Data.ExtraExpensesDollars}" VerticalAlignment="Center" FontWeight="Bold"
+                                           Foreground="{Binding WdTotals.Data.Completed, Converter={StaticResource IncompleteColorConverter}}" />
+                                <TextBlock Grid.Column="8" Text="{Binding WdTotals.Data.Completed}" VerticalAlignment="Center" FontWeight="Bold"
+                                           Foreground="{Binding WdTotals.Data.Completed, Converter={StaticResource IncompleteColorConverter}}" />
+                            </Grid>
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+        </StackPanel>
+
+</UserControl>

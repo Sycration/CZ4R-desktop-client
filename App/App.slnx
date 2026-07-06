@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="../cz4r-api/src/Org.OpenAPITools/Org.OpenAPITools.csproj" />
+  <Project Path="App.csproj" />
+</Solution>

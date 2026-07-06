@@ -1,0 +1,256 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:App.ViewModels"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="960" d:DesignHeight="680"
+             x:Class="App.Views.DashboardView"
+             x:DataType="vm:DashboardViewModel">
+
+    <Design.DataContext>
+        <vm:DashboardViewModel/>
+    </Design.DataContext>
+
+    <DockPanel Margin="8">
+        <!-- Stats bar -->
+        <Border DockPanel.Dock="Top" Padding="8,4" BorderBrush="Gray" BorderThickness="0,0,0,1" Margin="0,0,0,6">
+            <StackPanel Orientation="Horizontal" Spacing="16">
+                <TextBlock Text="{Binding JobsCount, StringFormat='Jobs: {0}'}" FontWeight="Bold" />
+                <TextBlock Text="{Binding WorkersCount, StringFormat='Workers: {0}'}" FontWeight="Bold" />
+                <TextBlock Text="{Binding MilesCount, StringFormat='Miles: {0}'}" FontWeight="Bold" />
+                <TextBlock Text="{Binding StatsDetail}" Foreground="Gray" />
+                <Button Command="{Binding FetchStatsCommand}" Content="↻" Width="30" />
+            </StackPanel>
+        </Border>
+
+        <!-- Main split: jobs left | detail/editor right -->
+        <Grid ColumnDefinitions="3*,2*">
+            <!-- Left: job list -->
+            <Border Grid.Column="0" BorderBrush="Gray" BorderThickness="1" CornerRadius="3" Margin="0,0,4,0">
+                <DockPanel>
+                    <StackPanel DockPanel.Dock="Top" Margin="6,4,6,0">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Button Command="{Binding FetchJobsCommand}" Content="Search Jobs" />
+                            <Button Command="{Binding BeginCreateJobCommand}" Content="Create Job"
+                                    IsVisible="{Binding IsAdmin}" />
+                            <TextBlock Text="{Binding JlStatus}" VerticalAlignment="Center" Foreground="Gray" />
+                        </StackPanel>
+                    </StackPanel>
+                    <Expander DockPanel.Dock="Bottom" Header="Filters" IsExpanded="True"
+                              HorizontalAlignment="Stretch">
+                        <Border Padding="6,4">
+                            <DockPanel>
+                                <Calendar x:Name="DateRangeCalendar" DockPanel.Dock="Left"
+                                          SelectionMode="SingleRange" AllowTapRangeSelection="True"
+                                          SelectedDate="{Binding JlStartDate}"
+                                          SelectedDatesChanged="DateRange_SelectedDatesChanged"
+                                          Loaded="DateRangeCalendar_Loaded"
+                                          MinWidth="300" Margin="0,0,8,0" />
+                                <Grid ColumnDefinitions="Auto,* Auto,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto">
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="Site:" VerticalAlignment="Center" />
+                                <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding JlSiteName}" />
+                                <TextBlock Grid.Row="0" Grid.Column="2" Text="WO:" VerticalAlignment="Center" Margin="8,0,4,0" />
+                                <TextBox Grid.Row="0" Grid.Column="3" Text="{Binding JlWorkOrder}" />
+                                <TextBlock Grid.Row="1" Grid.Column="0" Text="Addr:" VerticalAlignment="Center" />
+                                <TextBox Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" Text="{Binding JlAddress}" />
+                                <TextBlock Grid.Row="2" Grid.Column="0" Text="Notes:" VerticalAlignment="Center" />
+                                <TextBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3" Text="{Binding JlNotes}" />
+                                <StackPanel Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="4" Orientation="Horizontal" Spacing="8" Margin="0,2">
+                                    <TextBlock Text="Order:" VerticalAlignment="Center" />
+                                    <ComboBox SelectedItem="{Binding JlOrder}" Width="100">
+                                        <ComboBoxItem>Latest</ComboBoxItem>
+                                        <ComboBoxItem>Earliest</ComboBoxItem>
+                                    </ComboBox>
+                                    <Button IsVisible="{Binding IsAdmin}" Content="Workers ▾"
+                                            VerticalAlignment="Center">
+                                            <Button.Flyout>
+                                                <Flyout Placement="Bottom">
+                                                    <Border Padding="8" MinWidth="200" MaxHeight="300">
+                                                        <DockPanel>
+                                                            <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal"
+                                                                        Spacing="4" Margin="0,6,0,0">
+                                                                <Button Content="All" Command="{Binding SelectAllWorkersCommand}" />
+                                                                <Button Content="None" Command="{Binding DeselectAllWorkersCommand}" />
+                                                            </StackPanel>
+                                                            <ScrollViewer>
+                                                                <ItemsControl ItemsSource="{Binding FilterWorkers}">
+                                                                    <ItemsControl.ItemTemplate>
+                                                                        <DataTemplate>
+                                                                            <CheckBox Content="{Binding Name}"
+                                                                                      IsChecked="{Binding IsSelected}" />
+                                                                        </DataTemplate>
+                                                                    </ItemsControl.ItemTemplate>
+                                                                </ItemsControl>
+                                                            </ScrollViewer>
+                                                        </DockPanel>
+                                                    </Border>
+                                                </Flyout>
+                                            </Button.Flyout>
+                                        </Button>
+                                </StackPanel>
+                                <StackPanel Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="4" Orientation="Horizontal" Spacing="12" Margin="0,4,0,0">
+                                    <CheckBox Content="Assigned" IsChecked="{Binding JlAssigned}" />
+                                    <CheckBox Content="Started" IsChecked="{Binding JlStarted}" />
+                                    <CheckBox Content="Completed" IsChecked="{Binding JlCompleted}" />
+                                </StackPanel>
+                            </Grid>
+                            </DockPanel>
+                        </Border>
+                        </Expander>
+
+<ScrollViewer>
+                        <ItemsControl ItemsSource="{Binding Jobs}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <DockPanel Margin="0,2"
+                                           Background="{Binding Index, Converter={StaticResource StripeConverter}}">
+                                    <Border DockPanel.Dock="Left" Width="6"
+                                            Background="{Binding IsHighlighted,
+                                            Converter={StaticResource HighlightConverter}}" />
+                                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="4"
+                                            VerticalAlignment="Center" Margin="4,0">
+                                    <Button Content="Open" Click="OpenJob_Click" Width="55"
+                                                IsEnabled="{Binding !IsUnassigned}" />
+                                    <Button Content="Edit" Click="EditJob_Click" Width="55"
+                                            IsVisible="{Binding $parent[UserControl].DataContext.IsAdmin}" />
+                                </StackPanel>
+                                <StackPanel Margin="4,2">
+                                    <StackPanel Orientation="Horizontal" Spacing="4">
+                                        <TextBlock Text="{Binding Data.JobId, StringFormat='#{0}'}" FontWeight="Bold" Width="45"
+                                                   Foreground="{Binding Data.Status, Converter={StaticResource StatusColorConverter}}" />
+                                        <TextBlock Text="{Binding Data.WorkerName}"
+                                                   Foreground="{Binding Data.Status, Converter={StaticResource StatusColorConverter}}"
+                                                   IsVisible="{Binding $parent[UserControl].DataContext.IsAdmin}" />
+                                        <TextBlock Text="·" Foreground="Gray"
+                                                   IsVisible="{Binding $parent[UserControl].DataContext.IsAdmin}" />
+                                        <TextBlock Text="{Binding Data.Date}" Foreground="{Binding Data.Status, Converter={StaticResource StatusColorConverter}}" />
+                                        <TextBlock Text="·" Foreground="Gray" />
+                                        <TextBlock Text="{Binding Data.JobName}" Foreground="{Binding Data.Status, Converter={StaticResource StatusColorConverter}}" />
+                                        <TextBlock Text="·" Foreground="Gray" />
+                                        <TextBlock Text="{Binding Data.WorkOrder}" Foreground="{Binding Data.Status, Converter={StaticResource StatusColorConverter}}" />
+                                        <TextBlock Text="·" Foreground="Gray" />
+                                        <TextBlock Text="{Binding Data.Address}" Foreground="{Binding Data.Status, Converter={StaticResource StatusColorConverter}}" />
+                                        <TextBlock Text="{Binding Data.Status, Converter={StaticResource StatusEmojiConverter}}"
+                                                   Foreground="{Binding Data.Status, Converter={StaticResource StatusColorConverter}}" />
+                                    </StackPanel>
+                                </StackPanel>
+                                </DockPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </DockPanel>
+            </Border>
+
+            <!-- Right: detail panel -->
+            <Grid Grid.Column="1" Margin="4,0,0,0">
+                <Border BorderBrush="Gray" BorderThickness="1" CornerRadius="3" Padding="8"
+                        IsVisible="{Binding DetailVisible}">
+                <StackPanel Spacing="8">
+                    <TextBlock Text="{Binding SelectedJob.JobName, StringFormat='Job Details — {0}'}"
+                                   FontSize="16" FontWeight="Bold" />
+
+                    <Border Background="#10808080" Padding="6" CornerRadius="3">
+                        <StackPanel Spacing="2">
+                            <TextBlock Text="{Binding SelectedJob.JobId, StringFormat='Job ID: {0}'}" />
+                            <TextBlock Text="{Binding SelectedJob.WorkOrder, StringFormat='Work Order: {0}'}" />
+                            <TextBlock Text="{Binding SelectedJob.Address, StringFormat='Address: {0}'}" />
+                            <TextBlock Text="{Binding SelectedJob.Date, StringFormat='Date: {0}'}" />
+                            <TextBlock Text="{Binding SelectedJob.ServiceCode, StringFormat='Service: {0}'}" />
+                            <TextBlock Text="{Binding SelectedJob.Notes, StringFormat='Notes: {0}'}" />
+                            <TextBlock Text="{Binding SelectedJob.Status, StringFormat='Status: {0}'}" />
+                            <TextBlock Text="{Binding SelectedJob.WorkerName, StringFormat='Worker: {0}'}" />
+                        </StackPanel>
+                    </Border>
+
+                    <TextBlock Text="Check In / Out" FontWeight="Bold" />
+                    <Grid ColumnDefinitions="Auto,* Auto,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto">
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Job:" VerticalAlignment="Center" />
+                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding CioJobId}" VerticalAlignment="Center" FontWeight="Bold" />
+                        <TextBlock Grid.Row="0" Grid.Column="2" Text="Worker:" VerticalAlignment="Center" Margin="24,0,4,0" />
+                        <TextBlock Grid.Row="0" Grid.Column="3" Text="{Binding CioWorkerId}" VerticalAlignment="Center" FontWeight="Bold" />
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Sign in:" VerticalAlignment="Center" />
+                        <TimePicker Grid.Row="1" Grid.Column="1" SelectedTime="{Binding CioSignin}" />
+                        <TextBlock Grid.Row="1" Grid.Column="2" Text="Sign out:" VerticalAlignment="Center" Margin="8,0,4,0" />
+                        <TimePicker Grid.Row="1" Grid.Column="3" SelectedTime="{Binding CioSignout}" />
+
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Miles:" VerticalAlignment="Center" />
+                        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding CioMilesDriven}" />
+                        <TextBlock Grid.Row="2" Grid.Column="2" Text="Hours:" VerticalAlignment="Center" Margin="8,0,4,0" />
+                        <TextBox Grid.Row="2" Grid.Column="3" Text="{Binding CioHoursDriven}" />
+
+                        <TextBlock Grid.Row="3" Grid.Column="0" Text="Minutes:" VerticalAlignment="Center" />
+                        <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding CioMinutesDriven}" />
+                        <TextBlock Grid.Row="3" Grid.Column="2" Text="Expenses ($):" VerticalAlignment="Center" Margin="8,0,4,0" />
+                        <TextBox Grid.Row="3" Grid.Column="3" Text="{Binding CioExtraExpenses}" />
+
+                        <TextBlock Grid.Row="4" Grid.Column="0" Text="Notes:" VerticalAlignment="Center" />
+                        <TextBox Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="3" Text="{Binding CioNotes}" />
+                    </Grid>
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Button Command="{Binding SubmitCheckInOutCommand}" Content="Submit" />
+                        <Button Command="{Binding FetchAssignmentDataCommand}" Content="View Assignment Data" />
+                        <TextBlock Text="{Binding CioStatus}" VerticalAlignment="Center" Foreground="Gray" />
+                    </StackPanel>
+                    <Border Background="#10808080" Padding="6" CornerRadius="3" IsVisible="{Binding HasAdResult}">
+                        <TextBlock Text="{Binding AdResult}" FontFamily="Courier New" TextWrapping="Wrap" />
+                    </Border>
+                </StackPanel>
+                </Border>
+
+                <!-- Right: job editor -->
+                <Border BorderBrush="Gray" BorderThickness="1" CornerRadius="3" Padding="8"
+                        IsVisible="{Binding EditorVisible}">
+                <StackPanel Spacing="8">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <TextBlock Text="{Binding JobEditorTitle}" FontSize="16" FontWeight="Bold" />
+                        <Button Content="Cancel" Command="{Binding CancelEditCommand}" />
+                    </StackPanel>
+
+                    <Grid ColumnDefinitions="Auto,* Auto,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto">
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Site name:" VerticalAlignment="Center" />
+                        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding JeSitename}" />
+                        <TextBlock Grid.Row="0" Grid.Column="2" Text="Service code:" VerticalAlignment="Center" Margin="8,0,4,0" />
+                        <TextBox Grid.Row="0" Grid.Column="3" Text="{Binding JeServcode}" />
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Work order:" VerticalAlignment="Center" />
+                        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding JeWorkorder}" />
+                        <TextBlock Grid.Row="1" Grid.Column="2" Text="Date:" VerticalAlignment="Center" Margin="8,0,4,0" />
+                        <CalendarDatePicker Grid.Row="1" Grid.Column="3" SelectedDate="{Binding JeDate}" />
+
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Address:" VerticalAlignment="Center" />
+                        <TextBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3" Text="{Binding JeAddress}" />
+
+                        <TextBlock Grid.Row="3" Grid.Column="0" Text="Notes:" VerticalAlignment="Center" />
+                        <TextBox Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="3" Text="{Binding JeNotes}" />
+
+                        <TextBlock Grid.Row="4" Grid.Column="0" Text="Workers:" VerticalAlignment="Center" />
+                        <ScrollViewer Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="3" MaxHeight="160" Margin="0,4">
+                            <ItemsControl ItemsSource="{Binding AssignmentRows}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid ColumnDefinitions="*,Auto,Auto" Margin="0,1">
+                                            <TextBlock Grid.Column="0" Text="{Binding WorkerName}" VerticalAlignment="Center" />
+                                            <CheckBox Grid.Column="1" Content="Assigned" IsChecked="{Binding IsAssigned}" Margin="12,0" />
+                                            <CheckBox Grid.Column="2" Content="Flat" IsChecked="{Binding IsFlatRate}" Margin="12,0"
+                                                      IsEnabled="{Binding IsAssigned}" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Grid>
+
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Button Command="{Binding SaveJobCommand}" Content="Save Job" />
+                        <Button Command="{Binding DeleteJobCommand}" Content="Delete" IsVisible="{Binding JobEditorHasId}" />
+                        <TextBlock Text="{Binding JeStatus}" VerticalAlignment="Center" Foreground="Gray" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+            </Grid>
+        </Grid>
+    </DockPanel>
+
+</UserControl>

@@ -1,0 +1,1611 @@
+openapi: 3.1.0
+info:
+  description: ""
+  license:
+    name: AGPL-3.0
+    url: https://www.gnu.org/licenses/agpl-3.0.en.html
+  title: CZ4R API
+  version: 1.2.1
+servers:
+- url: /
+tags:
+- description: User API endpoints
+  name: user
+- description: Admin API endpoints
+  name: admin
+paths:
+  /admin/api/v1/change-worker:
+    post:
+      operationId: change_worker_api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorkerChangeInput"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkerChangeOutput"
+          description: ""
+      security:
+      - bearer_auth: []
+      summary: "Admins are not capable of removing their own admin privileges, and\
+        \ the API will return a 403 error if they try."
+      tags:
+      - admin
+  /admin/api/v1/create-worker:
+    post:
+      operationId: create_worker_api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorkerCreateInput"
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkerCreateOutput"
+          description: ""
+      security:
+      - bearer_auth: []
+      summary: Responds `201 Created` with the new worker's id on success.
+      tags:
+      - admin
+  /admin/api/v1/deactivate-worker:
+    post:
+      operationId: deactivate_api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DeactivateInput"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeactivateOutput"
+          description: ""
+      security:
+      - bearer_auth: []
+      summary: "Admins are not capable of deactivating themselves, and the API will\
+        \ return a 403 error if they try."
+      tags:
+      - admin
+  /admin/api/v1/export-database.sql:
+    get:
+      operationId: export_db_api
+      responses:
+        "200":
+          description: A raw `sqlite3 .dump` of the database.
+      security:
+      - bearer_auth: []
+      summary: |-
+        Not JSON (it streams a raw `sqlite3 .dump` of the database),
+        content-type: application/octet-stream
+      tags:
+      - admin
+  /admin/api/v1/jobs:
+    post:
+      operationId: create_job_api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/JobEditInput"
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JobEditOutput"
+          description: ""
+      security:
+      - bearer_auth: []
+      summary: |-
+        `job_id` in the body is ignored (a new job always gets a fresh id).
+        Responds `201 Created`.
+      tags:
+      - admin
+  /admin/api/v1/jobs/{id}:
+    delete:
+      operationId: delete_job_api
+      parameters:
+      - description: Job id
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          format: int64
+          type: integer
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JobDeleteOutput"
+          description: ""
+      security:
+      - bearer_auth: []
+      summary: "Deletes a job. The id comes from the path, not the body."
+      tags:
+      - admin
+    get:
+      operationId: jobeditpage_api
+      parameters:
+      - description: Job id
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          format: int64
+          type: integer
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JobEditPageOutput"
+          description: ""
+      security:
+      - bearer_auth: []
+      tags:
+      - admin
+    put:
+      operationId: update_job_api
+      parameters:
+      - description: Job id
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          format: int64
+          type: integer
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/JobEditInput"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JobEditOutput"
+          description: ""
+      security:
+      - bearer_auth: []
+      summary: |-
+        Updates an existing job.
+        The id comes from the path, not the body.
+      tags:
+      - admin
+  /admin/api/v1/logout-worker:
+    post:
+      operationId: logout_user_api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LogoutForm"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LogoutUserOutput"
+          description: ""
+      security:
+      - bearer_auth: []
+      summary: "This is intended to be used by admins to forcibly log another worker\
+        \ out, e.g. if they left their session open on a public computer."
+      tags:
+      - admin
+  /admin/api/v1/reset-pw:
+    post:
+      operationId: reset_pw_api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResetPwInput"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResetPwOutput"
+          description: ""
+      security:
+      - bearer_auth: []
+      summary: Forces a user to change their password on next login.
+      tags:
+      - admin
+  /admin/api/v1/restore-worker:
+    post:
+      operationId: restore_api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RestoreInput"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RestoreOutput"
+          description: ""
+      security:
+      - bearer_auth: []
+      summary: Restores a deactivated worker via the API.
+      tags:
+      - admin
+  /admin/api/v1/users:
+    get:
+      operationId: list_users_api
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/WorkerSummary"
+                type: array
+                default: null
+          description: ""
+      security:
+      - bearer_auth: []
+      summary: |-
+        The full list of workers (active and deactivated), for worker management and for
+        picking assignees when creating or editing a job.
+      tags:
+      - admin
+  /admin/api/v1/users/{id}:
+    get:
+      operationId: get_user_api
+      parameters:
+      - description: Worker id
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          format: int64
+          type: integer
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkerSummary"
+          description: ""
+      security:
+      - bearer_auth: []
+      summary: "Gets a single worker's profile, e.g. to prefill a worker-edit form."
+      tags:
+      - admin
+  /admin/api/v1/worker-data:
+    get:
+      operationId: workerdatapage_api
+      parameters:
+      - explode: true
+        in: query
+        name: worker
+        required: false
+        schema:
+          format: int64
+          nullable: true
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: start_date
+        required: false
+        schema:
+          format: date
+          nullable: true
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: end_date
+        required: false
+        schema:
+          format: date
+          nullable: true
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkerDataOutput"
+          description: ""
+      security:
+      - bearer_auth: []
+      summary: |-
+        Returns worker data entries for a given worker and date range.
+        Numbers are strings because the server has specific logic for rounding and formatting them, and the client should not attempt to reformat them.
+        TrueHoursWorked is the actual hours worked, while HoursWorked is the rounded up hours worked (minimum 1 hour).
+        The total object is a WDEntry, but only the numerical fields and the completed field are filled in.
+        The total completed field is true if all entries are completed, false if any entry is incomplete.
+      tags:
+      - admin
+  /api/v1/assignment-data:
+    get:
+      operationId: assignment_data_api
+      parameters:
+      - description: Job ID
+        explode: true
+        in: query
+        name: id
+        required: true
+        schema:
+          format: int64
+          type: integer
+        style: form
+      - description: Worker ID
+        explode: true
+        in: query
+        name: worker
+        required: true
+        schema:
+          format: int64
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FullAssignmentData"
+          description: ""
+      security:
+      - bearer_auth: []
+      tags:
+      - user
+  /api/v1/change-pw:
+    post:
+      operationId: change_pw_api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChangePwInput"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChangePwOutput"
+          description: ""
+      summary: Changes the current user's password
+      tags:
+      - user
+  /api/v1/checkinout:
+    post:
+      operationId: checkinout_api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CheckInOutInput"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CheckInOutOutput"
+          description: ""
+      security:
+      - bearer_auth: []
+      summary: Sign in and sign out parameters accept full ISO8601 or simple HH:MM
+        time strings.
+      tags:
+      - user
+  /api/v1/joblist:
+    get:
+      operationId: joblist_api
+      parameters:
+      - explode: true
+        in: query
+        name: start_date
+        required: false
+        schema:
+          format: date
+          nullable: true
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: end_date
+        required: false
+        schema:
+          format: date
+          nullable: true
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: site_name
+        required: false
+        schema:
+          nullable: true
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: work_order
+        required: false
+        schema:
+          nullable: true
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: address
+        required: false
+        schema:
+          nullable: true
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: notes
+        required: false
+        schema:
+          nullable: true
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: order
+        required: false
+        schema:
+          allOf:
+          - $ref: "#/components/schemas/Order"
+          nullable: true
+        style: form
+      - explode: true
+        in: query
+        name: assigned
+        required: false
+        schema:
+          nullable: true
+          type: boolean
+        style: form
+      - explode: true
+        in: query
+        name: started
+        required: false
+        schema:
+          nullable: true
+          type: boolean
+        style: form
+      - explode: true
+        in: query
+        name: completed
+        required: false
+        schema:
+          nullable: true
+          type: boolean
+        style: form
+      - explode: true
+        in: query
+        name: workers
+        required: false
+        schema:
+          nullable: true
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JobListOutput"
+          description: ""
+      security:
+      - bearer_auth: []
+      summary: |-
+        The workers parameter is a dash-separated list of worker ids to filter by, e.g. `workers=1-2-3`.
+        Date range is YYYY-MM-DD format, defaults to today through 15 days from now.
+        Non-admins can only see their own jobs, and the workers parameter is ignored for them.
+        Admins' view defaults to show all assignments for all workers, which is the recommended default.
+        The three booleans default to true
+      tags:
+      - user
+  /api/v1/login:
+    post:
+      operationId: login_api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginForm"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginOutput"
+          description: ""
+      summary: Issues a beater token for API authentication.
+      tags:
+      - user
+  /api/v1/logout:
+    post:
+      operationId: logout_api
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LogoutOutput"
+          description: ""
+      security:
+      - bearer_auth: []
+      summary: Revokes the bearer token used to authenticate this very request.
+      tags:
+      - user
+  /api/v1/refresh-token:
+    post:
+      operationId: refresh_token_api
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginOutput"
+          description: ""
+      security:
+      - bearer_auth: []
+      summary: |-
+        Refreshes the bearer token used to authenticate this very request, returning a new token.
+        The old token is revoked and can no longer be used.
+      tags:
+      - user
+  /api/v1/stats:
+    get:
+      operationId: index_api
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HomeStats"
+          description: ""
+      summary: "Some public statistics, does not require authentication."
+      tags:
+      - user
+  /api/v1/whoami:
+    get:
+      operationId: whoami
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkerSummary"
+          description: ""
+      security:
+      - bearer_auth: []
+      summary: |-
+        Gets the current user's details
+        Equivalent to the `/admin/api/v1/users/:id` endpoint, but for the currently logged-in user.
+      tags:
+      - user
+components:
+  schemas:
+    ChangePwInput:
+      description: |-
+        Request body shared by the web form and the JSON API for changing a
+        password.
+      example:
+        id: 0
+        password1: password1
+        password2: password2
+      properties:
+        id:
+          format: int64
+          type: integer
+        password1:
+          type: string
+        password2:
+          type: string
+      required:
+      - id
+      - password1
+      - password2
+    ChangePwOutput:
+      example:
+        changed: true
+        id: 0
+      properties:
+        changed:
+          type: boolean
+        id:
+          format: int64
+          type: integer
+      required:
+      - changed
+      - id
+    CheckInOutInput:
+      description: |-
+        The data needed to update a single worker's check-in/out record for a
+        job. Used as the request body for both the web form and the JSON API.
+      example:
+        extra_expenses_cents: 0
+        hours_driven: 6.0274563
+        job_id: 1
+        miles_driven: 5.962134
+        minutes_driven: 5.637377
+        notes: notes
+        signin: signin
+        signout: signout
+        worker_id: 2
+      properties:
+        extra_expenses_cents:
+          format: int64
+          nullable: true
+          type: integer
+        hours_driven:
+          format: float
+          nullable: true
+          type: number
+        job_id:
+          format: int64
+          type: integer
+        miles_driven:
+          format: float
+          nullable: true
+          type: number
+        minutes_driven:
+          format: float
+          nullable: true
+          type: number
+        notes:
+          nullable: true
+          type: string
+        signin:
+          nullable: true
+          type: string
+        signout:
+          nullable: true
+          type: string
+        worker_id:
+          format: int64
+          type: integer
+      required:
+      - job_id
+      - worker_id
+    CheckInOutOutput:
+      example:
+        job_id: 0
+        worker_id: 6
+      properties:
+        job_id:
+          format: int64
+          type: integer
+        worker_id:
+          format: int64
+          type: integer
+      required:
+      - job_id
+      - worker_id
+    DeactivateInput:
+      description: |-
+        Request body shared by the web form and the JSON API for deactivating a
+        worker.
+      example:
+        user: 0
+      properties:
+        user:
+          format: int64
+          type: integer
+      required:
+      - user
+    DeactivateOutput:
+      example:
+        user: 0
+      properties:
+        user:
+          format: int64
+          type: integer
+      required:
+      - user
+    FullAssignmentData:
+      example:
+        address: address
+        date: 2000-01-23
+        extraexpcents: 0
+        hours_driven: 6.0274563
+        job_id: 1
+        job_notes: job_notes
+        miles_driven: 5.962134
+        minutes_driven: 5.637377
+        servicecode: servicecode
+        signin: signin
+        signout: signout
+        sitename: sitename
+        using_flat_rate: true
+        worker_id: 2
+        worker_notes: worker_notes
+        workorder: workorder
+      properties:
+        address:
+          type: string
+        date:
+          format: date
+          type: string
+        extraexpcents:
+          format: int64
+          type: integer
+        hours_driven:
+          format: float
+          type: number
+        job_id:
+          format: int64
+          type: integer
+        job_notes:
+          type: string
+        miles_driven:
+          format: float
+          type: number
+        minutes_driven:
+          format: float
+          type: number
+        servicecode:
+          type: string
+        signin:
+          nullable: true
+          type: string
+        signout:
+          nullable: true
+          type: string
+        sitename:
+          type: string
+        using_flat_rate:
+          type: boolean
+        worker_id:
+          format: int64
+          type: integer
+        worker_notes:
+          type: string
+        workorder:
+          type: string
+      required:
+      - address
+      - date
+      - extraexpcents
+      - hours_driven
+      - job_id
+      - job_notes
+      - miles_driven
+      - minutes_driven
+      - servicecode
+      - sitename
+      - using_flat_rate
+      - worker_id
+      - worker_notes
+      - workorder
+    HomeStats:
+      description: |-
+        The summary statistics shown on the homepage: total jobs/miles/workers
+        tracked, and a few rough daily/monthly averages. This is public
+        information (shown to logged-out visitors too), so unlike most of the
+        other `/api/v1/*` endpoints, this one requires no authentication.
+      example:
+        jobs: 0
+        jobs_avg: jobs_avg
+        miles: miles
+        miles_avg: miles_avg
+        site_url: site_url
+        workers: 6
+        workers_avg: workers_avg
+      properties:
+        jobs:
+          format: int64
+          type: integer
+        jobs_avg:
+          type: string
+        miles:
+          type: string
+        miles_avg:
+          type: string
+        site_url:
+          type: string
+        workers:
+          format: int64
+          type: integer
+        workers_avg:
+          type: string
+      required:
+      - jobs
+      - jobs_avg
+      - miles
+      - miles_avg
+      - site_url
+      - workers
+      - workers_avg
+    JobAssignment:
+      description: |-
+        A single worker assignment on a job, and whether that worker is being
+        paid a flat rate for it.
+      example:
+        flat_rate: true
+        worker: 0
+      properties:
+        flat_rate:
+          type: boolean
+        worker:
+          format: int64
+          type: integer
+      required:
+      - flat_rate
+      - worker
+    JobData:
+      example:
+        address: address
+        date: date
+        job_id: 6
+        job_name: job_name
+        notes: notes
+        service_code: service_code
+        status: assigned
+        work_order: work_order
+        worker_id: 1
+        worker_name: worker_name
+      properties:
+        address:
+          type: string
+        date:
+          type: string
+        job_id:
+          format: int64
+          type: integer
+        job_name:
+          type: string
+        notes:
+          type: string
+        service_code:
+          type: string
+        status:
+          $ref: "#/components/schemas/Status"
+        work_order:
+          type: string
+        worker_id:
+          format: int64
+          nullable: true
+          type: integer
+        worker_name:
+          type: string
+      required:
+      - address
+      - date
+      - job_id
+      - job_name
+      - notes
+      - service_code
+      - status
+      - work_order
+      - worker_name
+    JobDeleteOutput:
+      example:
+        job_id: 0
+      properties:
+        job_id:
+          format: int64
+          type: integer
+      required:
+      - job_id
+    JobDetail:
+      description: |-
+        A simplified view of a [`Job`] suitable for JSON responses (dates as
+        strings rather than `time::Date`).
+      properties:
+        address:
+          type: string
+        date:
+          type: string
+        id:
+          format: int64
+          type: integer
+        notes:
+          type: string
+        servicecode:
+          type: string
+        sitename:
+          type: string
+        workorder:
+          type: string
+      required:
+      - address
+      - date
+      - id
+      - notes
+      - servicecode
+      - sitename
+      - workorder
+    JobEditInput:
+      description: |-
+        Request body shared by the web form and the JSON API for creating or
+        updating a job. `job_id` is `None` when creating a new job.
+      example:
+        address: address
+        assignments:
+        - flat_rate: true
+          worker: 0
+        - flat_rate: true
+          worker: 0
+        date: 2000-01-23
+        job_id: 6
+        notes: notes
+        servcode: servcode
+        sitename: sitename
+        workorder: workorder
+      properties:
+        address:
+          type: string
+        assignments:
+          items:
+            $ref: "#/components/schemas/JobAssignment"
+          type: array
+          default: null
+        date:
+          format: date
+          type: string
+        job_id:
+          format: int64
+          nullable: true
+          type: integer
+        notes:
+          type: string
+        servcode:
+          type: string
+        sitename:
+          type: string
+        workorder:
+          type: string
+      required:
+      - address
+      - assignments
+      - date
+      - notes
+      - servcode
+      - sitename
+      - workorder
+    JobEditOutput:
+      example:
+        job_id: 0
+      properties:
+        job_id:
+          format: int64
+          type: integer
+      required:
+      - job_id
+    JobEditPageOutput:
+      description: |-
+        The data needed to render (or serve as JSON) the job-edit page: the job
+        itself (`None` when creating a new job) and every active worker along
+        with their assignment status on it.
+      example:
+        job: ""
+        workers:
+        - assigned: true
+          flat_rate: true
+          id: 0
+          name: name
+        - assigned: true
+          flat_rate: true
+          id: 0
+          name: name
+      properties:
+        job:
+          allOf:
+          - $ref: "#/components/schemas/JobDetail"
+          nullable: true
+        workers:
+          items:
+            $ref: "#/components/schemas/WorkerAssignmentInfo"
+          type: array
+          default: null
+      required:
+      - workers
+    JobListOutput:
+      description: |-
+        The full result of a job-list search: every matching job/assignment row
+        plus the (possibly defaulted) search parameters that produced it. Shared
+        by both the HTML page and the JSON API.
+      example:
+        admin: true
+        assigned: true
+        completed: true
+        count: 0
+        jobs:
+        - address: address
+          date: date
+          job_id: 6
+          job_name: job_name
+          notes: notes
+          service_code: service_code
+          status: assigned
+          work_order: work_order
+          worker_id: 1
+          worker_name: worker_name
+        - address: address
+          date: date
+          job_id: 6
+          job_name: job_name
+          notes: notes
+          service_code: service_code
+          status: assigned
+          work_order: work_order
+          worker_id: 1
+          worker_name: worker_name
+        order: Latest
+        params:
+          address: address
+          end: end
+          fieldnotes: fieldnotes
+          site_name: site_name
+          start: start
+          work_order: work_order
+          workers:
+          - id: 5
+            name: name
+            selected: true
+          - id: 5
+            name: name
+            selected: true
+        started: true
+      properties:
+        admin:
+          type: boolean
+        assigned:
+          type: boolean
+        completed:
+          type: boolean
+        count:
+          minimum: 0
+          type: integer
+        jobs:
+          items:
+            $ref: "#/components/schemas/JobData"
+          type: array
+          default: null
+        order:
+          $ref: "#/components/schemas/Order"
+        params:
+          $ref: "#/components/schemas/SearchParams"
+        started:
+          type: boolean
+      required:
+      - admin
+      - assigned
+      - completed
+      - count
+      - jobs
+      - order
+      - params
+      - started
+    LoginForm:
+      example:
+        password: password
+        username: username
+      properties:
+        password:
+          type: string
+        username:
+          type: string
+      required:
+      - password
+      - username
+    LoginOutput:
+      description: |-
+        The outcome of attempting to log in. `must_change_pw` is `true` when the
+        credentials were valid but the account is required to change its
+        password before a session (or, for the API, a token) can be issued. On
+        the web this always redirects rather than returning this body; the API
+        returns it directly.
+
+        `token` is only ever populated by the JSON API (`POST /api/v1/login`):
+        it's the bearer token to send as `Authorization: Bearer <token>` on
+        every subsequent `/api/v1/*` or `/admin/api/v1/*` request. The HTML UI
+        doesn't use tokens at all - it authenticates via a cookie session
+        instead, so `token` is always `None` there.
+      example:
+        id: 0
+        must_change_pw: true
+        token: token
+        username: username
+      properties:
+        id:
+          format: int64
+          type: integer
+        must_change_pw:
+          type: boolean
+        token:
+          nullable: true
+          type: string
+        username:
+          type: string
+      required:
+      - id
+      - must_change_pw
+      - username
+    LogoutForm:
+      example:
+        id: 0
+      properties:
+        id:
+          format: int64
+          type: integer
+      required:
+      - id
+    LogoutOutput:
+      example:
+        logged_out: true
+      properties:
+        logged_out:
+          type: boolean
+      required:
+      - logged_out
+    LogoutUserOutput:
+      example:
+        id: 0
+      properties:
+        id:
+          format: int64
+          type: integer
+      required:
+      - id
+    Order:
+      enum:
+      - Latest
+      - Earliest
+      type: string
+    ResetPwInput:
+      example:
+        id: 0
+      properties:
+        id:
+          format: int64
+          type: integer
+      required:
+      - id
+    ResetPwOutput:
+      example:
+        id: 0
+      properties:
+        id:
+          format: int64
+          type: integer
+      required:
+      - id
+    RestoreInput:
+      example:
+        user: 0
+      properties:
+        user:
+          format: int64
+          type: integer
+      required:
+      - user
+    RestoreOutput:
+      example:
+        user: 0
+      properties:
+        user:
+          format: int64
+          type: integer
+      required:
+      - user
+    SearchParams:
+      example:
+        address: address
+        end: end
+        fieldnotes: fieldnotes
+        site_name: site_name
+        start: start
+        work_order: work_order
+        workers:
+        - id: 5
+          name: name
+          selected: true
+        - id: 5
+          name: name
+          selected: true
+      properties:
+        address:
+          type: string
+        end:
+          type: string
+        fieldnotes:
+          type: string
+        site_name:
+          type: string
+        start:
+          type: string
+        work_order:
+          type: string
+        workers:
+          items:
+            $ref: "#/components/schemas/WorkerFilterOption"
+          type: array
+          default: null
+      required:
+      - address
+      - end
+      - fieldnotes
+      - site_name
+      - start
+      - work_order
+      - workers
+    Status:
+      enum:
+      - assigned
+      - started
+      - signedout
+      - outnotin
+      type: string
+    WDEntry:
+      example:
+        Completed: true
+        Date: Date
+        ExtraExpensesDollars: ExtraExpensesDollars
+        FlatRate: true
+        HoursDriven: HoursDriven
+        HoursWorked: HoursWorked
+        JobId: 0
+        Location: Location
+        MilesDriven: MilesDriven
+        TrueHoursWorked: TrueHoursWorked
+        WorkerId: 6
+      properties:
+        Completed:
+          type: boolean
+        Date:
+          type: string
+        ExtraExpensesDollars:
+          type: string
+        FlatRate:
+          type: boolean
+        HoursDriven:
+          type: string
+        HoursWorked:
+          type: string
+        JobId:
+          format: int64
+          type: integer
+        Location:
+          type: string
+        MilesDriven:
+          type: string
+        TrueHoursWorked:
+          type: string
+        WorkerId:
+          format: int64
+          type: integer
+      required:
+      - Completed
+      - Date
+      - ExtraExpensesDollars
+      - FlatRate
+      - HoursDriven
+      - HoursWorked
+      - JobId
+      - Location
+      - MilesDriven
+      - TrueHoursWorked
+      - WorkerId
+    WorkerAssignmentInfo:
+      description: "A worker, and whether/how they're assigned to the job being edited."
+      example:
+        assigned: true
+        flat_rate: true
+        id: 0
+        name: name
+      properties:
+        assigned:
+          type: boolean
+        flat_rate:
+          type: boolean
+        id:
+          format: int64
+          type: integer
+        name:
+          type: string
+      required:
+      - assigned
+      - flat_rate
+      - id
+      - name
+    WorkerChangeInput:
+      description: |-
+        Request body shared by the web form and the JSON API for changing a
+        worker's details.
+      example:
+        address: address
+        admin: true
+        drivetime: drivetime
+        email: email
+        flatrate: flatrate
+        hourly: hourly
+        id: 0
+        mileage: mileage
+        name: name
+        phone: phone
+      properties:
+        address:
+          type: string
+        admin:
+          nullable: true
+          type: boolean
+        drivetime:
+          type: string
+        email:
+          type: string
+        flatrate:
+          type: string
+        hourly:
+          type: string
+        id:
+          format: int64
+          type: integer
+        mileage:
+          type: string
+        name:
+          type: string
+        phone:
+          type: string
+      required:
+      - address
+      - drivetime
+      - email
+      - flatrate
+      - hourly
+      - id
+      - mileage
+      - name
+      - phone
+    WorkerChangeOutput:
+      example:
+        id: 0
+      properties:
+        id:
+          format: int64
+          type: integer
+      required:
+      - id
+    WorkerCreateInput:
+      description: |-
+        Request body shared by the web form and the JSON API for creating a
+        worker. Money fields are decimal strings (e.g. `"12.50"`), matching what
+        the HTML form sends; the JSON API accepts the same convention for
+        consistency between the two.
+      example:
+        address: address
+        admin: true
+        drivetime: drivetime
+        email: email
+        flatrate: flatrate
+        hourly: hourly
+        mileage: mileage
+        name: name
+        phone: phone
+      properties:
+        address:
+          type: string
+        admin:
+          nullable: true
+          type: boolean
+        drivetime:
+          type: string
+        email:
+          type: string
+        flatrate:
+          type: string
+        hourly:
+          type: string
+        mileage:
+          type: string
+        name:
+          type: string
+        phone:
+          type: string
+      required:
+      - address
+      - drivetime
+      - email
+      - flatrate
+      - hourly
+      - mileage
+      - name
+      - phone
+    WorkerCreateOutput:
+      example:
+        id: 0
+      properties:
+        id:
+          format: int64
+          type: integer
+      required:
+      - id
+    WorkerDataOutput:
+      example:
+        entries:
+        - Completed: true
+          Date: Date
+          ExtraExpensesDollars: ExtraExpensesDollars
+          FlatRate: true
+          HoursDriven: HoursDriven
+          HoursWorked: HoursWorked
+          JobId: 0
+          Location: Location
+          MilesDriven: MilesDriven
+          TrueHoursWorked: TrueHoursWorked
+          WorkerId: 6
+        - Completed: true
+          Date: Date
+          ExtraExpensesDollars: ExtraExpensesDollars
+          FlatRate: true
+          HoursDriven: HoursDriven
+          HoursWorked: HoursWorked
+          JobId: 0
+          Location: Location
+          MilesDriven: MilesDriven
+          TrueHoursWorked: TrueHoursWorked
+          WorkerId: 6
+        from: from
+        num_jobs: 0
+        to: to
+        totals:
+          Completed: true
+          Date: Date
+          ExtraExpensesDollars: ExtraExpensesDollars
+          FlatRate: true
+          HoursDriven: HoursDriven
+          HoursWorked: HoursWorked
+          JobId: 0
+          Location: Location
+          MilesDriven: MilesDriven
+          TrueHoursWorked: TrueHoursWorked
+          WorkerId: 6
+      properties:
+        entries:
+          items:
+            $ref: "#/components/schemas/WDEntry"
+          type: array
+          default: null
+        from:
+          type: string
+        num_jobs:
+          minimum: 0
+          type: integer
+        to:
+          type: string
+        totals:
+          $ref: "#/components/schemas/WDEntry"
+      required:
+      - entries
+      - from
+      - num_jobs
+      - to
+      - totals
+    WorkerFilterOption:
+      description: |-
+        A worker, and whether they're currently included in a job-list search's
+        worker filter.
+      example:
+        id: 5
+        name: name
+        selected: true
+      properties:
+        id:
+          format: int64
+          type: integer
+        name:
+          type: string
+        selected:
+          type: boolean
+      required:
+      - id
+      - name
+      - selected
+    WorkerSummary:
+      description: |-
+        A worker's admin-visible profile, safe to expose over the JSON API -
+        unlike [`Worker`], this deliberately excludes `hash`/`salt`.
+
+        This is the shape used both by `/admin/api/v1/users` (worker
+        management) and, filtered to active workers, by job-assignment flows
+        that just need to know who exists and pick some subset of them.
+      example:
+        address: address
+        admin: true
+        deactivated: true
+        email: email
+        flat_rate_cents: 0
+        id: 6
+        must_change_pw: true
+        name: name
+        phone: phone
+        rate_drive_hourly_cents: 1
+        rate_hourly_cents: 5
+        rate_mileage_cents: 5
+      properties:
+        address:
+          type: string
+        admin:
+          type: boolean
+        deactivated:
+          type: boolean
+        email:
+          type: string
+        flat_rate_cents:
+          format: int64
+          type: integer
+        id:
+          format: int64
+          type: integer
+        must_change_pw:
+          type: boolean
+        name:
+          type: string
+        phone:
+          type: string
+        rate_drive_hourly_cents:
+          format: int64
+          type: integer
+        rate_hourly_cents:
+          format: int64
+          type: integer
+        rate_mileage_cents:
+          format: int64
+          type: integer
+      required:
+      - address
+      - admin
+      - deactivated
+      - email
+      - flat_rate_cents
+      - id
+      - must_change_pw
+      - name
+      - phone
+      - rate_drive_hourly_cents
+      - rate_hourly_cents
+      - rate_mileage_cents
+  securitySchemes:
+    bearer_auth:
+      bearerFormat: opaque
+      description: "The token returned by `POST /api/v1/login`. Send as `Authorization:\
+        \ Bearer <token>`."
+      scheme: bearer
+      type: http
+
