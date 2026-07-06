@@ -1,4 +1,4 @@
-# CZ4R Admin Client
+# CZ4R Desktop Client
 
 Cross-platform desktop admin client for the CZ4R field-service job/worker management system, built with Avalonia UI.
 
